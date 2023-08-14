@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@webcontainer/api": "^1.1.3",
+    "lexical": "",
     "pa11y": "^6.2.3"
   }
 }

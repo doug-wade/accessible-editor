@@ -1,47 +1,72 @@
-import './style.css'
+import './style.css';
 import { WebContainer } from '@webcontainer/api';
-import { files } from './files';
+import { files as cliFiles } from './cli-files';
+import { files as httpServerFiles } from './http-server-files';
 
 /** @type {import('@webcontainer/api').WebContainer}  */
-let webcontainerInstance;
+let httpServerWebcontainerInstance;
+
+/** @type {import('@webcontainer/api').WebContainer}  */
+let cliWebcontainerInstance;
+
+/** @type boolean */
+let httpServerBooting = true;
+
+/** @type boolean */
+let cliBooting = true;
 
 window.addEventListener('load', async () => {
-  textareaEl.value = files['index.js'].file.contents;
-  textareaEl.addEventListener('input', (e) => {
-    writeIndexJS(e.currentTarget.value);
+  textareaEl.value = `
+    <div>
+      <a href="#">click me</a>
+      <img src="https://www.skilljar.com/wp-content/uploads/2019/06/skilljar_logo.svg">
+    </div>
+  `;
+
+  postContentsButton.addEventListener('click', async () => {
+    booting = true;
+    await writeIndexHtml(textareaEl.value);
   });
 
   // Call only once
-  webcontainerInstance = await WebContainer.boot();
-  await webcontainerInstance.mount(files);
+  httpServerWebcontainerInstance = await WebContainer.boot();
+  cliWebcontainerInstance = await WebContainer.boot();
+
+  await Promise.all([
+    httpServerWebcontainerInstance.mount(httpServerFiles),
+    cliWebcontainerInstance.mount(cliFiles),
+  ]);
 
   const exitCode = await installDependencies();
   if (exitCode !== 0) {
     throw new Error('Installation failed');
-  };
+  }
+
+  cliBooting = false;
 
   startDevServer();
 });
 
 async function installDependencies() {
   // Install dependencies
-  const installProcess = await webcontainerInstance.spawn('npm', ['install']);
-  installProcess.output.pipeTo(new WritableStream({
-    write(data) {
-      console.log(data);
-    }
-  }))
-  // Wait for install command to exit
-  return installProcess.exit;
+  return await Promise.all([
+    httpServerWebcontainerInstance,
+    cliWebcontainerInstance,
+  ])
+    .map((webContainerInstance) =>
+      webContainerInstance.spawn('npm', ['install'])
+    )
+    .map((process) => process.exit);
 }
 
 async function startDevServer() {
   // Run `npm run start` to start the Express app
-  await webcontainerInstance.spawn('npm', ['run', 'start']);
+  await httpServerWebcontainerInstance.spawn('npm', ['run', 'start']);
 
   // Wait for `server-ready` event
-  webcontainerInstance.on('server-ready', (port, url) => {
+  httpServerWebcontainerInstance.on('server-ready', (port, url) => {
     iframeEl.src = url;
+    booting = false;
   });
 }
 
@@ -49,8 +74,9 @@ async function startDevServer() {
  * @param {string} content
  */
 
-async function writeIndexJS(content) {
-  await webcontainerInstance.fs.writeFile('/index.js', content);
+async function writeIndexHtml(contentFragment) {
+  const content = `<html lang="en"><head></head><body>${contentFragment}</body>`;
+  await httpServerWebcontainerInstance.fs.writeFile('/index.html', content);
 }
 
 document.querySelector('#app').innerHTML = `
@@ -62,10 +88,13 @@ document.querySelector('#app').innerHTML = `
       <iframe src="loading.html"></iframe>
     </div>
   </div>
-`
+`;
 
 /** @type {HTMLIFrameElement | null} */
 const iframeEl = document.querySelector('iframe');
 
 /** @type {HTMLTextAreaElement | null} */
 const textareaEl = document.querySelector('textarea');
+
+/** @type {HTMLTextAreaElement | null} */
+const postContentsButton = document.querySelector('button');
