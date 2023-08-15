@@ -16,16 +16,16 @@ let httpServerBooting = true;
 let cliBooting = true;
 
 window.addEventListener('load', async () => {
-  textareaEl.value = `
+  tinymce.activeEditor.setContent(`
     <div>
       <a href="#">click me</a>
       <img src="https://www.skilljar.com/wp-content/uploads/2019/06/skilljar_logo.svg">
     </div>
-  `;
+  `);
 
   postContentsButton.addEventListener('click', async () => {
-    booting = true;
-    await writeIndexHtml(textareaEl.value);
+    cliBooting = true;
+    await writeIndexHtml(tinymce.activeEditor.getContent());
   });
 
   // Call only once
@@ -66,7 +66,7 @@ async function startDevServer() {
   // Wait for `server-ready` event
   httpServerWebcontainerInstance.on('server-ready', (port, url) => {
     iframeEl.src = url;
-    booting = false;
+    cliBooting = false;
   });
 }
 
@@ -82,7 +82,7 @@ async function writeIndexHtml(contentFragment) {
 document.querySelector('#app').innerHTML = `
   <div class="container">
     <div class="editor">
-      <textarea>I am a textarea</textarea>
+      <textarea class="tinymce-editor">I am a textarea</textarea>
     </div>
     <div class="preview">
       <iframe src="loading.html"></iframe>
@@ -90,11 +90,12 @@ document.querySelector('#app').innerHTML = `
   </div>
 `;
 
+tinymce.init({
+  selector: '.tinymce-editor'
+});
+
 /** @type {HTMLIFrameElement | null} */
 const iframeEl = document.querySelector('iframe');
-
-/** @type {HTMLTextAreaElement | null} */
-const textareaEl = document.querySelector('textarea');
 
 /** @type {HTMLTextAreaElement | null} */
 const postContentsButton = document.querySelector('button');
