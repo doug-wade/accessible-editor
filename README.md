@@ -1,4 +1,4 @@
-<img align="right" src="assets/logo.png">
+<img align="left" height="120" width="120" src="assets/logo.png">
 
 # A11y Editor
 
