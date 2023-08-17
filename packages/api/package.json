@@ -1,0 +1,17 @@
+{
+  "name": "accessible-editor-server",
+  "version": "0.0.1",
+  "description": "A server for accessible editor",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node -- index.js",
+    "test": "echo 'lol hackathon'"
+  },
+  "author": "Douglas B Wade <douglas.b.wade@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.21.0",
+    "pa11y": "^6.2.3"
+  }
+}
