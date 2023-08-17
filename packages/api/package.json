@@ -1,0 +1,16 @@
+{
+  "name": "accessible-editor-server",
+  "version": "0.0.1",
+  "description": "A server for accessible editor",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node -- index.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "author": "Douglas B Wade <douglas.b.wade@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.21.0"
+  }
+}
