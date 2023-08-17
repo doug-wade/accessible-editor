@@ -6,13 +6,8 @@
   "scripts": {
     "test": "echo 'lol hackathon'"
   },
-  "devDependencies": {
-    "vite": "^4.1.0"
-  },
-  "dependencies": {
-    "@webcontainer/api": "^1.1.3",
-    "lexical": "",
-    "pa11y": "^6.2.3",
-    "tinymce": "^6.6.2"
-  }
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "yarn@3.6.1"
 }
